@@ -150,9 +150,17 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onSu
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bodyData)
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || 'Authentication request failed.');
+      
+      if (!res.ok) {
+        let errorDetail = `Authentication failed (${res.status})`;
+        try {
+          const errData = await res.json();
+          errorDetail = errData.detail || errorDetail;
+        } catch (_) {}
+        throw new Error(errorDetail);
+      }
 
+      const data = await res.json();
       onSuccess(data);
       onClose();
     } catch (err) {
