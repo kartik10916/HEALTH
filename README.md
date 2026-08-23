@@ -69,7 +69,7 @@ GOOGLE_REFRESH_TOKEN=your_google_oauth_refresh_token
 ### 3. Seed Database
 Initialize SQLite database tables and seed initial Indian doctor profiles, patients, and admin accounts:
 ```bash
-python seed_admin.py
+python seed_admin.py 
 ```
 
 ### 4. Run Local Server
