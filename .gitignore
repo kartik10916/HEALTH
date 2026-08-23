@@ -1,0 +1,25 @@
+# Python Cache Files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local Database
+healthcare.db
+
+# Environment Secrets
+.env
+
+# Frontend Dependencies & Builds
+frontend/node_modules/
+frontend/dist/
+frontend/.oxlintrc.json
+
+# IDE Configs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
