@@ -91,9 +91,18 @@ export default function PatientView({ token, onOpenAuth, heroSymptoms, clearHero
         return;
       }
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || 'Triage failed');
+      if (!res.ok) {
+        let errMsg = `Triage failed (${res.status})`;
+        try {
+          const errData = await res.json();
+          errMsg = errData.detail || errMsg;
+        } catch (_) {
+          // If response is not JSON
+        }
+        throw new Error(errMsg);
+      }
 
+      const data = await res.json();
       setTriageResult(data);
 
       // Auto update specialty filter to recommend matching specialist

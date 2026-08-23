@@ -10,9 +10,24 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 
 # Vercel: use PostgreSQL (set DATABASE_URL in Vercel dashboard)
-# Local dev: fall back to SQLite
+# Local dev / Serverless fallback: use SQLite
 if not DATABASE_URL:
-    DATABASE_URL = "sqlite:///./healthcare.db"
+    if os.getenv("VERCEL"):
+        # On Vercel, root filesystem is read-only. /tmp is writable.
+        tmp_db_path = "/tmp/healthcare.db"
+        local_db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "healthcare.db")
+        
+        # If local pre-seeded db exists and /tmp db doesn't, copy it
+        if os.path.exists(local_db_path) and not os.path.exists(tmp_db_path):
+            try:
+                import shutil
+                shutil.copy2(local_db_path, tmp_db_path)
+            except Exception as e:
+                print(f"Failed to copy seeded DB to /tmp: {e}")
+        
+        DATABASE_URL = f"sqlite:///{tmp_db_path}"
+    else:
+        DATABASE_URL = "sqlite:///./healthcare.db"
 
 # Normalize Neon/Heroku-style postgres:// → postgresql:// for SQLAlchemy
 if DATABASE_URL.startswith("postgres://"):

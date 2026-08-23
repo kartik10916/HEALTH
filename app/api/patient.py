@@ -29,22 +29,30 @@ def symptom_triage(
     if current_user:
         patient_profile = db.query(PatientProfile).filter(PatientProfile.user_id == current_user.id).first()
     
-    triage_log = TriageLog(
-        patient_id=patient_profile.id if patient_profile else None,
-        symptoms_text=payload.symptoms,
-        ai_recommendation=analysis_result.get("guidance", ""),
-        inferred_specialty=specialty,
-        risk_level=analysis_result.get("urgency", "Low")
-    )
-    db.add(triage_log)
-    db.commit()
+    try:
+        triage_log = TriageLog(
+            patient_id=patient_profile.id if patient_profile else None,
+            symptoms_text=payload.symptoms,
+            ai_recommendation=analysis_result.get("guidance", ""),
+            inferred_specialty=specialty,
+            risk_level=analysis_result.get("urgency", "Low")
+        )
+        db.add(triage_log)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"Notice: Triage log commit skipped: {e}")
 
-    matched_doctors = db.query(DoctorProfile).filter(
-        DoctorProfile.specialty.ilike(f"%{specialty}%")
-    ).all()
-    
-    if not matched_doctors:
-        matched_doctors = db.query(DoctorProfile).all()
+    matched_doctors = []
+    try:
+        matched_doctors = db.query(DoctorProfile).filter(
+            DoctorProfile.specialty.ilike(f"%{specialty}%")
+        ).all()
+        
+        if not matched_doctors:
+            matched_doctors = db.query(DoctorProfile).all()
+    except Exception as e:
+        print(f"Doctor query notice: {e}")
 
     doctor_list = []
     for doc in matched_doctors[:5]:

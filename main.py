@@ -29,7 +29,10 @@ from app.api.admin import router as admin_router
 from app.scheduler import start_scheduler, shutdown_scheduler
 
 # Initialize SQLAlchemy Tables
-Base.metadata.create_all(bind=engine)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"DB init notice: {e}")
 
 def run_db_migrations():
     from sqlalchemy import inspect, text

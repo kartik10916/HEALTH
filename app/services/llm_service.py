@@ -86,18 +86,26 @@ def analyze_symptoms_with_llm(symptoms: str, age: int = None, gender: str = None
     try:
         import google.generativeai as genai
         genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel('gemini-pro')
         
-        prompt = f"Analyse these symptoms and return: urgency level (Low / Medium / High), chief complaint, and three suggested questions for the doctor. Symptoms: {symptoms}"
-        response = model.generate_content(prompt)
-        text = response.text.strip()
+        # Try modern gemini models first
+        try:
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            prompt = f"Analyse these symptoms and return: urgency level (Low / Medium / High), chief complaint, and three suggested questions for the doctor. Symptoms: {symptoms}"
+            response = model.generate_content(prompt)
+            text = response.text.strip()
+        except Exception:
+            model = genai.GenerativeModel('gemini-pro')
+            prompt = f"Analyse these symptoms and return: urgency level (Low / Medium / High), chief complaint, and three suggested questions for the doctor. Symptoms: {symptoms}"
+            response = model.generate_content(prompt)
+            text = response.text.strip()
         
+        rule_fallback = analyze_symptoms_rule_engine(symptoms, age, gender)
         return {
-            "urgency": "Medium",
-            "urgency_badge_color": "yellow",
-            "inferred_specialty": "General Medicine & Ayush",
-            "ai_analysis": text[:300],
-            "guidance": "Please review the pre-visit briefing with your consulting physician."
+            "urgency": rule_fallback["urgency"],
+            "urgency_badge_color": rule_fallback["urgency_badge_color"],
+            "inferred_specialty": rule_fallback["inferred_specialty"],
+            "ai_analysis": text[:350],
+            "guidance": rule_fallback["guidance"]
         }
     except Exception as e:
         logger.warning(f"Gemini LLM call failed ({e}). Fallback to rule engine.")
@@ -113,9 +121,14 @@ def generate_pre_visit_summary(symptoms_text: str, patient_info: dict = None) ->
     try:
         import google.generativeai as genai
         genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel('gemini-pro')
-        response = model.generate_content(exact_prompt)
-        return response.text.strip()
+        try:
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            response = model.generate_content(exact_prompt)
+            return response.text.strip()
+        except Exception:
+            model = genai.GenerativeModel('gemini-pro')
+            response = model.generate_content(exact_prompt)
+            return response.text.strip()
     except Exception as e:
         logger.warning(f"Pre-visit LLM summary failed ({e}). Using fallback text.")
         return f"Pre-Visit Summary (Fallback):\nChief Complaint: {symptoms_text[:100]}\nUrgency: Medium\nSuggested Questions:\n1. What is the root cause of these symptoms?\n2. What precautions should I follow?\n3. Are diagnostic tests recommended?"
@@ -130,9 +143,14 @@ def generate_post_visit_summary(doctor_notes: str, prescription: str) -> str:
     try:
         import google.generativeai as genai
         genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel('gemini-pro')
-        response = model.generate_content(exact_prompt)
-        return response.text.strip()
+        try:
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            response = model.generate_content(exact_prompt)
+            return response.text.strip()
+        except Exception:
+            model = genai.GenerativeModel('gemini-pro')
+            response = model.generate_content(exact_prompt)
+            return response.text.strip()
     except Exception as e:
         logger.warning(f"Post-visit LLM summary failed ({e}). Using fallback text.")
         return f"Patient-Friendly Visit Summary (Fallback):\nDiagnosis & Evaluation: {doctor_notes or 'Clinical consultation completed.'}\nMedication Schedule: {prescription or 'Take prescribed medicines as directed.'}\nFollow-Up Steps: Maintain adequate hydration, rest, and contact hospital helpline if symptoms recur."
