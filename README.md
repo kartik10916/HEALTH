@@ -1,153 +1,237 @@
-# SwasthyaCare AI - Enterprise Doctor Appointment & AI Triage Platform 🇮🇳
+# 🏥 SwasthyaCare AI — Telemedicine & Smart Doctor Appointment Platform 🇮🇳
 
-A full-stack, enterprise-grade healthcare platform built with **FastAPI**, **SQLAlchemy ORM**, **JWT Authentication (RBAC)**, **Google Gemini LLM Integration**, **Google Calendar OAuth 2.0 Sync**, **Background APScheduler Workers**, and **Vanilla HTML5/CSS/JS Portals** for Patients, Doctors, and System Administrators.
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Vercel-black?style=for-the-badge&logo=vercel)](https://healthappointment-ecru.vercel.app)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![Google Gemini](https://img.shields.io/badge/Google_Gemini-AI_Triage-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
 
----
-
-## 📋 Features & Core Capabilities
-
-- 🔐 **Role-Based Access Control (RBAC)**: Authentication & authorization for `Patient`, `Doctor`, and `Admin` users using JWT bearer tokens.
-- 🔒 **Concurrency & Double-Booking Protection**: Database schema constraints (`UniqueConstraint('doctor_id', 'appointment_date', 'start_time')`) and 10-minute temporary slot holds (`SlotHold`) to safely handle simultaneous booking attempts.
-- 🏖️ **Doctor Leave Conflict Management**: Automated query of affected scheduled consultations when a doctor is marked on leave, automatic cancellation, and asynchronous background email notification dispatch.
-- 🤖 **LLM Clinical Summaries & Triage**:
-  - **Pre-Visit Summary Prompt**: `"Analyse these symptoms and return: urgency level (Low / Medium / High), chief complaint, and three suggested questions for the doctor. Symptoms: "`
-  - **Post-Visit Summary Prompt**: `"Convert these clinical notes into a patient-friendly summary with medication schedule and follow-up steps: "`
-  - **Graceful Degradation**: 100% fail-safe fallback text ensures system uptime even if the LLM API is unreachable.
-- ⏰ **Background Jobs & Reminders**: `APScheduler` jobs for periodic medication reminders based on prescription frequency, email retry queues, and temporary slot hold releases.
-- 📅 **Google Calendar OAuth 2.0 Integration**: Asynchronous best-effort Google Calendar event creation upon booking, and deletion/update upon cancellation or reschedule.
+Welcome to **SwasthyaCare AI**! An open-source, full-stack healthcare platform inspired by the **Ayushman Bharat Digital Mission (ABDM)**. It combines modern telemedicine workflows, AI-assisted symptom triage, OPD slot scheduling, prescription management, and doctor leave handling into a clean, unified experience.
 
 ---
 
-## 🛠️ Tech Stack & Requirements
+## 🌐 Live Application
 
-- **Backend**: Python 3.10+, FastAPI, SQLAlchemy, Pydantic, APScheduler, Passlib (Bcrypt), Python-Jose, Google Generative AI (Gemini).
-- **Frontend**: Responsive Semantic HTML5, Vanilla JavaScript (Fetch API with 401/403 auth error handling), and Vanilla CSS3 Design System.
-- **Database**: SQLite (local) / PostgreSQL (production compatible).
+- **Live URL**: [https://healthappointment-ecru.vercel.app](https://healthappointment-ecru.vercel.app)
+- **Interactive API Docs (Swagger UI)**: [https://healthappointment-ecru.vercel.app/api/docs](https://healthappointment-ecru.vercel.app/api/docs)
+- **Alternative ReDoc**: [https://healthappointment-ecru.vercel.app/api/redoc](https://healthappointment-ecru.vercel.app/api/redoc)
 
 ---
 
-## 🚀 Quick Start Guide
+## ✨ What makes SwasthyaCare AI special?
 
-### 1. Clone & Install Dependencies
+### 1. 🤖 AI-Powered Clinical Triage & Summaries
+- **Instant Symptom Analysis**: Patients can describe their symptoms in English or Hindi. Powered by **Google Gemini** (with an emergency rule-engine fallback), the platform evaluates urgency levels (`Low`, `Medium`, `High`, `Emergency`) and immediately recommends matching medical specialists.
+- **Pre-Visit Briefings**: Doctors receive AI-generated symptom summaries with suggested questions before the patient even steps into the consultation.
+- **Post-Visit Patient Care Plans**: Converts complex doctor clinical notes and prescriptions into simple, actionable daily schedules for patients.
+
+### 2. 🗓️ Smart Doctor Scheduling & Concurrency Protection
+- **No Double-Booking**: Strict database-level uniqueness constraints ensure two patients can never book the same doctor at the same time.
+- **10-Minute Slot Holds**: While a patient is selecting and reviewing a slot, it is temporarily locked so nobody else takes it.
+- **Doctor Leave Conflict Resolution**: If a doctor requests leave on an active day, existing consultations are flagged, patients are alerted, and slots are automatically adjusted.
+
+### 3. 👥 Portals Built for Everyone
+- **Patient Portal**: ABHA health ID linking, symptom checker, doctor directory with OPD live badges, 1-click booking, prescription history, and `.ics` calendar exports.
+- **Doctor Command Center**: Daily appointments timeline, patient history lookup, prescription writer, clinical notes recorder, and leave scheduler.
+- **Admin Dashboard**: Real-time hospital metrics, specialist capacity tracking, revenue estimation (₹), and system notification retry logs.
+
+### 4. 🔐 Flexible Authentication & ABHA Integration
+- **JWT Bearer Auth**: Secure, role-based tokens (`patient`, `doctor`, `admin`).
+- **Google OAuth 2.0 / Sign-In**: Integrated with Google Identity Services SDK for 1-click sign up & login.
+- **ABHA Health ID Support**: Designed to align with Indian digital health records standards.
+
+---
+
+## 🏗️ Architecture & Tech Stack
+
+```mermaid
+graph TD
+    A[React 19 + Vite Frontend SPA] -->|Fetch API / JSON / JWT| B[FastAPI Backend Server]
+    B -->|SQLAlchemy ORM| C[(SQLite / PostgreSQL Database)]
+    B -->|Async HTTP| D[Google Gemini 1.5 Flash API]
+    B -->|OAuth 2.0| E[Google Calendar API]
+    B -->|SMTP / TLS| F[Email Notification Dispatcher]
+    B -->|APScheduler| G[Background Cron Jobs]
+```
+
+- **Frontend**: React 19, Vite, Lucide Icons, Vanilla CSS3 Custom Design System (mobile responsive).
+- **Backend**: Python 3.10+, FastAPI (ASGI), SQLAlchemy 2.0, Pydantic v2.
+- **Security**: Passlib (Bcrypt), Python-Jose (JWT), Google Identity Verification.
+- **AI & Integrations**: Google Generative AI (Gemini Flash), Google Calendar API, iCalendar (`.ics`) generation.
+- **Deployment**: Vercel Serverless (Python ASGI + Static CDN).
+
+---
+
+## ⚡ Getting Started Locally
+
+### Prerequisites
+- Python 3.10 or higher
+- Node.js 18+ & npm
+- Git
+
+### 1. Clone the repository
 ```bash
-git clone <repository_url>
-cd healthcare_platform
+git clone https://github.com/kartik10916/HEALTH.git
+cd HEALTH
+```
+
+### 2. Set up Backend (Python & FastAPI)
+```bash
+# Create and activate a virtual environment
+python -m venv venv
+# On Windows:
+venv\Scripts\activate
+# On Linux/macOS:
+source venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Configure Environment Variables
-Create a `.env` file based on `.env.example`:
+### 3. Configure Environment Variables
+Create a `.env` file in the project root:
 ```bash
 cp .env.example .env
 ```
 
-#### `.env.example` Reference:
-```ini
-# Security & JWT Configuration
-SECRET_KEY=supersecret-swasthya-jwt-key-change-in-production
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=480
+Here's what each setting does:
 
-# Database Connection URL
-DATABASE_URL=sqlite:///./healthcare.db
+| Variable | Description | Default / Example |
+|---|---|---|
+| `SECRET_KEY` | Key used to sign JWT tokens | `supersecret-healthcare-jwt-key` |
+| `ALGORITHM` | JWT signing algorithm | `HS256` |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Session token duration | `480` (8 hours) |
+| `DATABASE_URL` | SQLite / PostgreSQL URI | `sqlite:///./healthcare.db` |
+| `GEMINI_API_KEY` | *(Optional)* Google Gemini Key for AI Triage | `AIzaSy...` (Falls back to rule engine if empty) |
+| `GOOGLE_CLIENT_ID` | *(Optional)* Google Cloud OAuth Client ID | `xxxx.apps.googleusercontent.com` |
+| `SMTP_HOST` / `SMTP_USER` | *(Optional)* Gmail / SMTP for email alerts | `smtp.gmail.com` |
 
-# LLM Service (Google Gemini API Key - Optional, fallback rule-engine active)
-GEMINI_API_KEY=your_gemini_api_key_here
-
-# SMTP Email Configuration (Optional, fallback mock logger active)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=notifications@swasthya.in
-SMTP_PASS=your_smtp_password
-
-# Google Calendar OAuth 2.0 Credentials (Optional, fallback .ics generator active)
-GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-GOOGLE_REFRESH_TOKEN=your_google_oauth_refresh_token
-```
-
-### 3. Seed Database
-Initialize SQLite database tables and seed initial Indian doctor profiles, patients, and admin accounts:
+### 4. Seed the Database with Demo Doctors & Patients
+Run the included seed script to populate sample AIIMS & Indian specialist profiles, patients, and initial OPD schedules:
 ```bash
-python seed_admin.py 
+python seed_admin.py
 ```
 
-### 4. Run Local Server
+### 5. Start the Development Servers
+
+**Option A — Run Fullstack via FastAPI (recommended for local test):**
 ```bash
-python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
+# Build frontend once
+cd frontend && npm install && npm run build && cd ..
+
+# Start FastAPI server
+uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
-Open browser at: **`http://127.0.0.1:8000`**
+Open **`http://127.0.0.1:8000`** in your browser!
+
+**Option B — Run with Vite Hot Reload (for frontend development):**
+```bash
+# Terminal 1: Backend
+uvicorn main:app --reload --port 8000
+
+# Terminal 2: Frontend
+cd frontend
+npm install
+npm run dev
+```
+Open **`http://localhost:5173`** (Vite will proxy all `/api` requests to port 8000).
 
 ---
 
-## 🔑 Demo Credentials
+## 🔑 Pre-seeded Demo Accounts
 
-| Role | Email | Password | Details |
+You can test every role immediately using these sample credentials:
+
+| Role | Email | Password | What you can test |
 |---|---|---|---|
-| **Admin** | `admin@swasthya.in` | `Admin@123` | Full administrative control & ₹ revenue metrics |
-| **Doctor** | `dr.sharma@swasthya.in` | `Doctor@123` | Dr. Ananya Sharma (Cardiology, AIIMS) |
-| **Patient** | `rahul@example.com` | `Patient@123` | Rahul Verma (ABHA: 14-8765-4321-9012) |
-| **Patient** | `kavita@example.com` | `Patient@123` | Kavita Patel (ABHA: 91-2345-6789-0123) |
+| 👑 **Administrator** | `admin@swasthya.in` | `Admin@123` | Hospital stats, revenue overview (₹), active doctor capacity |
+| 🩺 **Doctor (Cardiologist)** | `dr.sharma@swasthya.in` | `Doctor@123` | Consultation queue, prescription writing, leave management |
+| 🩺 **Doctor (General OPD)** | `dr.swaminathan@swasthya.in` | `Doctor@123` | Fever/triage cases, patient summaries, schedule slots |
+| 🧑‍🦰 **Patient** | `rahul@example.com` | `Patient@123` | ABHA profile (`14-8765-4321-9012`), AI symptom check, booking |
+| 👩‍🦱 **Patient** | `kavita@example.com` | `Patient@123` | Booking specialists, downloading `.ics` calendar events |
 
 ---
 
-## 🗄️ Database Schema & Models
+## ☁️ Deploying to Vercel (Step-by-Step)
 
-- **`users`**: `id`, `email`, `hashed_password`, `full_name`, `phone`, `role` (`admin`/`doctor`/`patient`), `is_active`, `created_at`.
-- **`doctor_profiles`**: `id`, `user_id`, `specialty`, `qualification`, `experience_years`, `bio`, `consultation_fee`, `room_number`, `working_start`, `working_end`, `slot_duration_minutes`.
-- **`patient_profiles`**: `id`, `user_id`, `abha_id`, `date_of_birth`, `gender`, `blood_group`, `medical_history`, `emergency_contact`.
-- **`appointments`**: `id`, `patient_id`, `doctor_id`, `appointment_date`, `start_time`, `end_time`, `status`, `symptom_summary`, `triage_urgency`, `pre_visit_summary`, `post_visit_summary`, `doctor_notes`, `prescription`, `google_event_id`.
-  - *Constraints*: `UniqueConstraint('doctor_id', 'appointment_date', 'start_time')`.
-- **`slot_holds`**: `id`, `doctor_id`, `patient_id`, `appointment_date`, `start_time`, `end_time`, `expires_at`.
-- **`doctor_leaves`**: `id`, `doctor_id`, `leave_date`, `reason`.
-- **`medication_reminders`**: `id`, `patient_id`, `appointment_id`, `medication_name`, `dosage`, `frequency_hours`, `next_reminder_at`, `is_active`.
-- **`notification_logs`**: `id`, `user_id`, `channel`, `recipient_email`, `title`, `message`, `body_html`, `status`, `retry_count`, `max_retries`, `error_message`, `sent_at`, `last_attempt_at`.
+This repository is pre-configured with `vercel.json` for one-click fullstack serverless deployment.
 
----
-
-## 🤖 Exact LLM Prompt Templates
-
-1. **Pre-Visit Symptom Analysis**:
-   ```
-   "Analyse these symptoms and return: urgency level (Low / Medium / High), chief complaint, and three suggested questions for the doctor. Symptoms: " + symptoms_text
-   ```
-
-2. **Post-Visit Patient Summary**:
-   ```
-   "Convert these clinical notes into a patient-friendly summary with medication schedule and follow-up steps: " + doctor_notes + " Prescription: " + prescription
-   ```
-
----
-
-## 📅 Google Calendar OAuth 2.0 Setup Steps
-
-1. Go to **[Google Cloud Console](https://console.cloud.google.com/)** and create a project.
-2. Enable the **Google Calendar API** under API & Services.
-3. Configure **OAuth Consent Screen** (User Type: External / Internal).
-4. Create **OAuth 2.0 Client ID credentials** (Application type: Web application).
-5. Obtain Refresh Token using Google OAuth Playground (`https://developers.google.com/oauthplayground`) with scope `https://www.googleapis.com/auth/calendar`.
-6. Add `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_REFRESH_TOKEN` to your `.env` file.
-
----
-
-## 🌐 Free Hosting Deployment Instructions (Render / Railway)
-
-### Deploying to Render
-1. Create a new **Web Service** on [Render.com](https://render.com).
-2. Connect your GitHub repository.
-3. Environment: `Python 3`.
-4. Build Command:
+1. **Push your code to GitHub**:
    ```bash
-   pip install -r requirements.txt && python seed_admin.py
+   git push origin main
    ```
-5. Start Command:
+2. **Deploy with Vercel CLI**:
    ```bash
-   uvicorn main:app --host 0.0.0.0 --port $PORT
+   npx vercel --prod
    ```
-6. Add Environment Variables in the Render dashboard matching `.env.example`.
+3. **Set Environment Variables in Vercel**:
+   Go to your **Vercel Project Dashboard** > **Settings** > **Environment Variables** and add:
+   - `SECRET_KEY` = your strong random string
+   - `ALGORITHM` = `HS256`
+   - `ACCESS_TOKEN_EXPIRE_MINUTES` = `480`
+   - `GEMINI_API_KEY` = *(Optional)* your Gemini API key
+   - `GOOGLE_CLIENT_ID` = *(Optional)* your Google OAuth client ID
 
-### Deploying to Railway
-1. Create a new project on [Railway.app](https://railway.app).
-2. Select **Deploy from GitHub repo**.
-3. Set variables in the Railway dashboard (`SECRET_KEY`, `DATABASE_URL`, etc.).
-4. Railway automatically detects `requirements.txt` and executes `uvicorn main:app --host 0.0.0.0 --port $PORT`.
+---
+
+## 🔐 Setting up Google Sign-In (OAuth 2.0)
+
+To let patients and doctors log in with Google on your live domain:
+
+1. Go to **[Google Cloud Console](https://console.cloud.google.com/apis/credentials)**.
+2. Under **OAuth consent screen**, select **External**, enter your app name (`SwasthyaCare AI`), and add `vercel.app` to **Authorized domains**.
+3. Under **Credentials**, click **+ CREATE CREDENTIALS** > **OAuth client ID** > **Web application**.
+4. In **Authorized JavaScript origins**, add your Vercel URL:
+   - `https://healthappointment-ecru.vercel.app`
+   - `http://localhost:5173` *(for local testing)*
+5. In **Authorized redirect URIs**, add:
+   - `https://healthappointment-ecru.vercel.app`
+   - `https://healthappointment-ecru.vercel.app/api/auth/google`
+6. Copy the **Client ID** and set it in Vercel as `GOOGLE_CLIENT_ID`.
+
+---
+
+## 📡 API Overview
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| `POST` | `/api/auth/register` | Public | Register new patient or doctor account |
+| `POST` | `/api/auth/login` | Public | Login with email and password |
+| `POST` | `/api/auth/google` | Public | Google Sign-In credential verification |
+| `GET` | `/api/auth/me` | User | Get current logged-in profile |
+| `POST` | `/api/patient/triage` | Public / User | AI symptom triage & specialist matching |
+| `GET` | `/api/patient/doctors` | Public | Search and filter specialist directory |
+| `GET` | `/api/patient/doctors/{id}/slots` | Public | Get real-time available time slots |
+| `POST` | `/api/patient/doctors/{id}/hold-slot` | Patient | Lock a slot for 10 minutes |
+| `POST` | `/api/patient/appointments` | Patient | Confirm appointment & trigger calendar sync |
+| `GET` | `/api/patient/appointments/{id}/ics` | Patient | Download iCalendar `.ics` file |
+| `GET` | `/api/doctor/appointments` | Doctor | Doctor's active consultation timeline |
+| `PUT` | `/api/doctor/appointments/{id}` | Doctor | Add clinical notes & prescriptions |
+| `POST` | `/api/doctor/leaves` | Doctor | Schedule leave & auto-notify affected patients |
+| `GET` | `/api/admin/stats` | Admin | Overall analytics, urgency breakdown & revenue |
+
+Interactive Swagger documentation is available at [`/api/docs`](https://healthappointment-ecru.vercel.app/api/docs).
+
+---
+
+## 🤝 Contributing
+
+Contributions are always welcome! Feel free to:
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+Distributed under the **MIT License**. See `LICENSE` for more information.
+
+---
+
+<div align="center">
+  <sub>Built with ❤️ for the Digital Health Mission India 🇮🇳</sub>
+</div>
