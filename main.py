@@ -136,7 +136,12 @@ def register_user(payload: UserRegister, db: Session = Depends(get_db)):
         db.add(doc_prof)
         db.commit()
 
-    token = create_access_token({"sub": user.id, "role": user.role})
+    token = create_access_token({
+        "sub": str(user.id),
+        "role": user.role,
+        "email": user.email,
+        "full_name": user.full_name
+    })
     return Token(
         access_token=token,
         token_type="bearer",
@@ -158,7 +163,12 @@ def login_user(payload: UserLogin, db: Session = Depends(get_db)):
     if not user.is_active:
         raise HTTPException(status_code=400, detail="User account is deactivated. Contact admin.")
 
-    token = create_access_token({"sub": user.id, "role": user.role})
+    token = create_access_token({
+        "sub": str(user.id),
+        "role": user.role,
+        "email": user.email,
+        "full_name": user.full_name
+    })
     return Token(
         access_token=token,
         token_type="bearer",
@@ -248,7 +258,12 @@ def google_auth_login(payload: GoogleLoginRequest, db: Session = Depends(get_db)
             db.add(doc_prof)
             db.commit()
 
-    token = create_access_token({"sub": user.id, "role": user.role})
+    token = create_access_token({
+        "sub": str(user.id),
+        "role": user.role,
+        "email": user.email,
+        "full_name": user.full_name
+    })
     return Token(
         access_token=token,
         token_type="bearer",

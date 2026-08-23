@@ -108,13 +108,43 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         raw_sub = payload.get("sub")
         if raw_sub is None:
             raise credentials_exception
-        user_id: int = int(raw_sub)
-        role: str = payload.get("role")
-        token_data = TokenData(user_id=user_id, role=role)
+        user_id = int(raw_sub)
+        role = payload.get("role", "patient")
+        email = payload.get("email")
+        full_name = payload.get("full_name")
     except Exception:
         raise credentials_exception
 
-    user = db.query(User).filter(User.id == token_data.user_id).first()
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user and email:
+        user = db.query(User).filter(User.email == email).first()
+
+    if not user and email:
+        try:
+            user = User(
+                id=user_id,
+                email=email,
+                full_name=full_name or email.split("@")[0].title(),
+                role=role,
+                is_active=True
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+        except Exception:
+            db.rollback()
+            user = db.query(User).filter(User.email == email).first()
+
+    if user and user.role == "patient" and not user.patient_profile:
+        try:
+            from app.models import PatientProfile
+            prof = PatientProfile(user_id=user.id)
+            db.add(prof)
+            db.commit()
+            db.refresh(user)
+        except Exception:
+            db.rollback()
+
     if user is None or not user.is_active:
         raise credentials_exception
     return user
@@ -124,12 +154,7 @@ def get_current_user_optional(token: Optional[str] = Depends(oauth2_scheme_optio
     if not token:
         return None
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        raw_sub = payload.get("sub")
-        if raw_sub is None:
-            return None
-        user_id: int = int(raw_sub)
-        return db.query(User).filter(User.id == user_id, User.is_active == True).first()
+        return get_current_user(token=token, db=db)
     except Exception:
         return None
 

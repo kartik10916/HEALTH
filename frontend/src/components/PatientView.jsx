@@ -201,8 +201,22 @@ export default function PatientView({ token, onOpenAuth, heroSymptoms, clearHero
         })
       });
 
+      if (res.status === 401 || res.status === 403) {
+        setBookingError('Session expired. Please sign in again to complete your booking.');
+        onOpenAuth('login');
+        return;
+      }
+
+      if (!res.ok) {
+        let errDetail = `Booking failed (${res.status})`;
+        try {
+          const errData = await res.json();
+          errDetail = errData.detail || errDetail;
+        } catch (_) {}
+        throw new Error(errDetail);
+      }
+
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || 'Booking failed');
 
       alert(`🎉 Appointment booked successfully with Dr. ${data.doctor_name} for ${bookingDate} at ${selectedSlot.start_time} IST!`);
       setIsBookingOpen(false);
