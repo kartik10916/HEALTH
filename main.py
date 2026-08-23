@@ -170,8 +170,10 @@ def login_user(payload: UserLogin, db: Session = Depends(get_db)):
 
 @app.get("/api/auth/google/config")
 def get_google_config():
-    client_id = os.getenv("GOOGLE_CLIENT_ID", "")
-    return {"client_id": client_id, "configured": bool(client_id)}
+    client_id = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+    if not client_id or client_id.startswith("your_") or "your_google_client_id" in client_id:
+        return {"client_id": "", "configured": False}
+    return {"client_id": client_id, "configured": True}
 
 
 @app.post("/api/auth/google", response_model=Token)
