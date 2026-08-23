@@ -11,11 +11,22 @@ Welcome to **SwasthyaCare AI**! An open-source, full-stack healthcare platform i
 
 ---
 
-## 🌐 Live Application
+> 🚀 **Live Production Deployment**: [https://healthappointment-ecru.vercel.app](https://healthappointment-ecru.vercel.app)
+> 
+> 📑 **Interactive API Docs (Swagger UI)**: [https://healthappointment-ecru.vercel.app/api/docs](https://healthappointment-ecru.vercel.app/api/docs)
+> 
+> 🩺 **Demo Patient / Doctor Logins**: Included in the [Credentials Table](#-pre-seeded-demo-accounts) below!
 
-- **Live URL**: [https://healthappointment-ecru.vercel.app](https://healthappointment-ecru.vercel.app)
-- **Interactive API Docs (Swagger UI)**: [https://healthappointment-ecru.vercel.app/api/docs](https://healthappointment-ecru.vercel.app/api/docs)
-- **Alternative ReDoc**: [https://healthappointment-ecru.vercel.app/api/redoc](https://healthappointment-ecru.vercel.app/api/redoc)
+---
+
+## 🌐 Live Application Links
+
+| Resource | Direct Link |
+|---|---|
+| 🏥 **Live Telemedicine Web App (Vercel)** | [https://healthappointment-ecru.vercel.app](https://healthappointment-ecru.vercel.app) |
+| 📑 **FastAPI Swagger API Documentation** | [https://healthappointment-ecru.vercel.app/api/docs](https://healthappointment-ecru.vercel.app/api/docs) |
+| 📖 **FastAPI ReDoc Interactive Docs** | [https://healthappointment-ecru.vercel.app/api/redoc](https://healthappointment-ecru.vercel.app/api/redoc) |
+| 🐙 **GitHub Source Code Repository** | [https://github.com/kartik10916/HEALTH](https://github.com/kartik10916/HEALTH) |
 
 ---
 
