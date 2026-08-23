@@ -87,7 +87,6 @@ def analyze_symptoms_with_llm(symptoms: str, age: int = None, gender: str = None
         import google.generativeai as genai
         genai.configure(api_key=GEMINI_API_KEY)
         
-        # Try modern gemini models first
         try:
             model = genai.GenerativeModel('gemini-1.5-flash')
             prompt = f"Analyse these symptoms and return: urgency level (Low / Medium / High), chief complaint, and three suggested questions for the doctor. Symptoms: {symptoms}"
@@ -135,7 +134,7 @@ def generate_pre_visit_summary(symptoms_text: str, patient_info: dict = None) ->
 
 
 def generate_post_visit_summary(doctor_notes: str, prescription: str) -> str:
-    exact_prompt = f"Convert these clinical notes into a patient-friendly summary with medication schedule and follow-up steps: Doctor Notes: {doctor_notes or 'Evaluation complete.'} Prescription: {prescription or 'As advised.'}"
+    exact_prompt = f"Convert these clinical notes into a patient-friendly summary with medication schedules and follow-up instructions. Notes: {doctor_notes or 'Clinical evaluation completed.'} Prescription: {prescription or 'As advised.'}"
 
     if not GEMINI_API_KEY or GEMINI_API_KEY.startswith("your_"):
         return f"Patient-Friendly Visit Summary (Fallback):\nDiagnosis & Evaluation: {doctor_notes or 'Clinical consultation completed.'}\nMedication Schedule: {prescription or 'Take prescribed medicines as directed.'}\nFollow-Up Steps: Maintain adequate hydration, rest, and contact hospital helpline if symptoms recur."
