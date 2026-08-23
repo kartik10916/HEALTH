@@ -304,7 +304,8 @@ def book_appointment(
         doctor_name=doctor.user.full_name,
         date_str=payload.appointment_date,
         time_str=payload.start_time,
-        room=doctor.room_number
+        room=doctor.room_number,
+        doctor_email=doctor.user.email if doctor.user else None
     )
 
     background_tasks.add_task(

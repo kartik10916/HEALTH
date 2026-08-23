@@ -110,7 +110,7 @@ def process_email_retry_queue(db: Session) -> int:
     return processed_count
 
 
-def send_appointment_confirmation_email(db: Session, user_id: int, patient_email: str, patient_name: str, doctor_name: str, date_str: str, time_str: str, room: str):
+def send_appointment_confirmation_email(db: Session, user_id: int, patient_email: str, patient_name: str, doctor_name: str, date_str: str, time_str: str, room: str, doctor_email: str = None):
     subject = f"SwasthyaCare Confirmation: Consultation with Dr. {doctor_name} on {date_str}"
     body = f"""
     <html>
@@ -131,10 +131,8 @@ def send_appointment_confirmation_email(db: Session, user_id: int, patient_email
       </body>
     </html>
     """
-    # Queue email in database and attempt immediate send
     notif = queue_email_notification(db, user_id, patient_email, subject, body)
     
-    # Attempt immediate delivery attempt
     success, err = send_single_email(patient_email, subject, body)
     if success:
         notif.status = "sent"
@@ -143,6 +141,28 @@ def send_appointment_confirmation_email(db: Session, user_id: int, patient_email
         notif.status = "failed"
         notif.error_message = err
     db.commit()
+
+    if doctor_email:
+        doc_subject = f"New Consultation Booked: {patient_name} on {date_str} at {time_str}"
+        doc_body = f"""
+        <html>
+          <body style="font-family: Arial, sans-serif; color: #0f172a; background-color: #f8fafc; padding: 20px;">
+            <div style="max-width: 600px; margin: auto; background: #ffffff; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0;">
+              <h2 style="color: #0f766e; margin-top: 0;">New Appointment Alert</h2>
+              <p>Dr. <strong>{doctor_name}</strong>,</p>
+              <p>A new patient consultation has been scheduled:</p>
+              <div style="background-color: #f0fdfa; padding: 16px; border-left: 4px solid #0f766e; border-radius: 6px; margin: 20px 0;">
+                <p style="margin: 4px 0;"><strong>Patient Name:</strong> {patient_name}</p>
+                <p style="margin: 4px 0;"><strong>Patient Email:</strong> {patient_email}</p>
+                <p style="margin: 4px 0;"><strong>Slot:</strong> {date_str} at {time_str} IST</p>
+                <p style="margin: 4px 0;"><strong>Room:</strong> {room}</p>
+              </div>
+              <p>Log in to your Doctor Command Center to review pre-visit symptoms and clinical records.</p>
+            </div>
+          </body>
+        </html>
+        """
+        send_single_email(doctor_email, doc_subject, doc_body)
 
 
 def send_appointment_reminder_email(db: Session, user_id: int, patient_email: str, patient_name: str, doctor_name: str, date_str: str, time_str: str):
