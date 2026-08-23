@@ -46,10 +46,16 @@ def run_db_migrations():
 
 run_db_migrations()
 
+IS_VERCEL = bool(os.getenv("VERCEL"))
+
 app = FastAPI(
     title="SwasthyaCare AI Telemedicine Platform API 🇮🇳",
     description="Enterprise Doctor Appointment, AI Symptom Triage, & Clinical Care System",
-    version="1.0.0"
+    version="1.0.0",
+    # On Vercel, /api/(.*) routes to this function, so docs must live under /api/
+    docs_url="/api/docs" if IS_VERCEL else "/docs",
+    openapi_url="/api/openapi.json" if IS_VERCEL else "/openapi.json",
+    redoc_url="/api/redoc" if IS_VERCEL else "/redoc",
 )
 
 # CORS Middleware Configuration
@@ -66,20 +72,26 @@ app.include_router(patient_router)
 app.include_router(doctor_router)
 app.include_router(admin_router)
 
-# Mount Static Files Directory
-static_dir = os.path.join(os.path.dirname(__file__), "static")
-if os.path.exists(static_dir):
-    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+# Mount Static Files Directory (local dev only — Vercel CDN serves them in production)
+if not os.getenv("VERCEL"):
+    static_dir = os.path.join(os.path.dirname(__file__), "static")
+    if os.path.exists(static_dir):
+        app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 @app.on_event("startup")
 def on_startup():
-    from seed_admin import seed_if_empty
-    seed_if_empty()
-    start_scheduler()
+    try:
+        from seed_admin import seed_if_empty
+        seed_if_empty()
+    except Exception as e:
+        print(f"[startup] seed_if_empty skipped: {e}")
+    if not os.getenv("VERCEL"):
+        start_scheduler()
 
 @app.on_event("shutdown")
 def on_shutdown():
-    shutdown_scheduler()
+    if not os.getenv("VERCEL"):
+        shutdown_scheduler()
 
 # --- Auth Endpoints ---
 
@@ -248,4 +260,8 @@ def get_me(current_user: User = Depends(get_current_user)):
 
 @app.get("/")
 def read_root():
+    # On Vercel, the frontend SPA is served by CDN at root
+    # On local dev, redirect to the static build
+    if os.getenv("VERCEL"):
+        return {"status": "SwasthyaCare API running", "docs": "/api/docs"}
     return RedirectResponse(url="/static/index.html")
