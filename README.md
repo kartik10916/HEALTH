@@ -15,7 +15,7 @@ Welcome to **SwasthyaCare AI**! An open-source, full-stack healthcare platform i
 > 
 > 📑 **Interactive API Docs (Swagger UI)**: [https://healthappointment-ecru.vercel.app/api/docs](https://healthappointment-ecru.vercel.app/api/docs)
 > 
-> 🩺 **Demo Patient / Doctor Logins**: Included in the [Credentials Table](#-pre-seeded-demo-accounts) below!
+> 🩺 **Demo Patient / Doctor Logins**: Included in the [Credentials Table](#-pre-seeded-demo-accounts) below
 
 ---
 
